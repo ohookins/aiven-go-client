@@ -154,8 +154,19 @@ var _ = Describe("Kafka Topic", func() {
 			}
 		})
 
-		It("list v2", func() {
-			list, errV2 := client.KafkaTopics.V2List(projectName, serviceName, []string{topicName})
+		It("cache list v2", func() {
+			list, errV2 := client.KafkaTopics.V2CacheList(projectName, serviceName, []string{topicName})
+			Expect(errV2).NotTo(HaveOccurred())
+
+			Expect(len(list)).Should(Equal(1))
+			Expect(list[0].Config.CleanupPolicy.Value).NotTo(BeEmpty())
+			Expect(list[0].Config.SegmentJitterMs.Value).To(Equal(segmentJitterMs))
+			Expect(list[0].Tags).NotTo(BeEmpty())
+			Expect(len(list[0].Tags)).To(Equal(2))
+		})
+
+		It("cache v2", func() {
+			list, errV2 := client.KafkaTopics.V2List(projectName, serviceName)
 			Expect(errV2).NotTo(HaveOccurred())
 
 			Expect(len(list)).Should(Equal(1))

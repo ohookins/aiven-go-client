@@ -122,14 +122,16 @@ type (
 
 	// KafkaListTopic represents kafka list topic model on Aiven.
 	KafkaListTopic struct {
-		CleanupPolicy         string `json:"cleanup_policy"`
-		MinimumInSyncReplicas int    `json:"min_insync_replicas"`
-		Partitions            int    `json:"partitions"`
-		Replication           int    `json:"replication"`
-		RetentionBytes        int    `json:"retention_bytes"`
-		RetentionHours        *int64 `json:"retention_hours,omitempty"`
-		State                 string `json:"state"`
-		TopicName             string `json:"topic_name"`
+		CleanupPolicy         string                   `json:"cleanup_policy"`
+		MinimumInSyncReplicas int                      `json:"min_insync_replicas"`
+		Partitions            int                      `json:"partitions"`
+		Replication           int                      `json:"replication"`
+		RetentionBytes        int                      `json:"retention_bytes"`
+		RetentionHours        *int64                   `json:"retention_hours,omitempty"`
+		State                 string                   `json:"state"`
+		TopicName             string                   `json:"topic_name"`
+		Config                KafkaTopicConfigResponse `json:"config"`
+		Tags                  []KafkaTopicTag          `json:"tags,omitempty"`
 	}
 
 	// Partition represents a Kafka partition.
@@ -259,7 +261,21 @@ func (h *KafkaTopicsHandler) Delete(project, service, topic string) error {
 }
 
 // V2List lists selected kafka topics using v2 API endpoint.
-func (h *KafkaTopicsHandler) V2List(project, service string, topics []string) ([]*KafkaTopic, error) {
+func (h *KafkaTopicsHandler) V2List(project, service string) ([]*KafkaListTopic, error) {
+	path := buildPath("project", project, "service", service, "topic")
+	bts, err := h.client.doV2GetRequest(path, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var r KafkaTopicsResponse
+	errR := checkAPIResponse(bts, &r)
+
+	return r.Topics, errR
+}
+
+// V2CacheList lists selected kafka topics using v2 API endpoint.
+func (h *KafkaTopicsHandler) V2CacheList(project, service string, topics []string) ([]*KafkaTopic, error) {
 	type v2ListRequest struct {
 		TopicNames []string `json:"topic_names"`
 	}
