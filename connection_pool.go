@@ -19,7 +19,7 @@ type (
 		PoolMode string  `json:"pool_mode"`
 		PoolName string  `json:"pool_name"`
 		PoolSize int     `json:"pool_size"`
-		Username *string `json:"username,omitempty"`
+		Username *string `json:"username"`
 	}
 
 	// UpdateConnectionPoolRequest are the parameters used to update a connection pool entry.
